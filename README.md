@@ -1,5 +1,3 @@
-# Job Test - NodeJS Developer
-
 ## Run with Docker:
 
 ```bash
