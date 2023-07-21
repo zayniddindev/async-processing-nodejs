@@ -1,0 +1,46 @@
+version: "3"
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq-container
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - app-network
+
+  m1_microservice:
+    build:
+      context: ./m1-http-svc
+    container_name: m1_http_microservice
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    environment:
+      - PORT=3000
+      - RMQ_URL=amqp://rabbitmq:5672
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+
+  m2_microservice:
+    build:
+      context: ./m2-task-executor-svc
+    container_name: m2_task_microservice
+    networks:
+      - app-network
+    environment:
+      - RMQ_URL=amqp://rabbitmq:5672
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+
+networks:
+  app-network:
+    driver: bridge
